@@ -5,14 +5,16 @@ using UnityEngine;
 
 public class ChessTurn
 {
+    public readonly FigureColor TurnSide;
     public readonly Vector2Int from, to;
     public readonly List<ActionFigure> delta;
 
-    public ChessTurn(Vector2Int from, Vector2Int to, List<ActionFigure> delta)
+    public ChessTurn(Vector2Int from, Vector2Int to, List<ActionFigure> delta, FigureColor turnSide)
     {
         this.from = from;
         this.to = to;
         this.delta = new(delta);
+        TurnSide = turnSide;
     }
 }
 
@@ -22,7 +24,8 @@ public class ChessBoard
     public ContainerBoard Container { get { return container; } }
     public ChessJudger Judger { get; private set; }
 
-    public event EventHandler OnMoveMade;
+    public delegate void TurnHandler(ChessTurn turn);
+    public event TurnHandler OnMoveMade;
 
     public ChessBoard()
     {
@@ -59,10 +62,10 @@ public class ChessBoard
         return moves;
     }
 
-    public void FinishMove()
+    public void FinishMove(ChessTurn turn)
     {
         if (OnMoveMade != null)
-            OnMoveMade(this, EventArgs.Empty);
+            OnMoveMade(turn);
     }
 
     public void RejectMove(ChessTurn turn)

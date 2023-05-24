@@ -41,7 +41,7 @@ public class DirIterator : IEnumerator<ChessMove>
     IEnumerator<Vector2Int> it_dir;
     int curr_depth;
 
-    CellState curr_state = new CellState(true, false);
+    bool isCurrentSolid = true;
 
     public Vector2Int CurrentTo => it_dir.Current * curr_depth;
     public ChessMove Current => new ChessMove(CurrentTo, ChessConditions.StandardCondition) + From;
@@ -62,7 +62,7 @@ public class DirIterator : IEnumerator<ChessMove>
     public bool MoveNext()
     {
         bool is_continue = true;
-        if (curr_state.is_figure)
+        if (isCurrentSolid)
         {
             is_continue = it_dir.MoveNext();
             curr_depth = 1;
@@ -74,7 +74,15 @@ public class DirIterator : IEnumerator<ChessMove>
 
         if (is_continue)
         {
-            curr_state = Current.Relation(board);
+            if (board.Borders(Current.To))
+            {
+                ChessFigure sub = board[Current.To.x, Current.To.y];
+                isCurrentSolid = sub.IsSolid;
+            }
+            else
+            {
+                isCurrentSolid = true;
+            }
         }
 
         return is_continue;

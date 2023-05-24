@@ -105,7 +105,7 @@ public class RCastleMove : ChessMove
 
     protected override void make_move(ChessBoard board)
     {
-        base.Execute(board);
+        base.make_move(board);
         board[To.x - 1, To.y] = board[7, To.y].MovedFigure;
         board[7, To.y] = new();
     }

@@ -19,6 +19,7 @@ public class Ghost : ChessFigure
         }
     }
 
+
     public Ghost(ChessBoard board, FigureColor color, Vector2Int ghost_point) : base(color)
     {
         this.ghost_point = ghost_point;
@@ -48,9 +49,9 @@ public class Ghost : ChessFigure
         board.OnMoveMade -= GhostKill;
     }
 
-    public void GhostKill(object sender, EventArgs e)
+    public void GhostKill(ChessTurn turn)
     {
-        if (board[ghost_point] == this)
+        if ((turn.TurnSide == OpponentColor) && (board[ghost_point] == this))
         {
             board[ghost_point] = new();
         }
@@ -139,14 +140,8 @@ public class PawnStep : ChessMove
 
     protected override void make_move(ChessBoard board)
     {
-        ChessFigure actor = board[From.x, From.y];
-        ChessFigure victim = board[To.x, To.y];
-
         board[To] = TransformTo.MovedFigure;
         board[From] = new();
-        victim.Eaten(actor);
-        board.FinishMove();
-
     }
 
 }

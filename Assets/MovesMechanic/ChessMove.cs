@@ -1,17 +1,5 @@
 using UnityEngine;
 
-public class CellState 
-{
-    public readonly bool is_figure;
-    // true, if cell "belongs" to enemy
-    public readonly bool is_opponent;
-    public CellState(bool is_figure, bool is_opponent)
-    {
-        this.is_figure = is_figure;
-        this.is_opponent = is_opponent;
-    }
-}
-
 public class ChessMove
 {
     public readonly Vector2Int From;
@@ -27,19 +15,6 @@ public class ChessMove
     static public ChessMove ld { get { return new ChessMove(Vector2Int.down + Vector2Int.left, ChessConditions.StandardCondition); } }
     static public ChessMove ru { get { return new ChessMove(Vector2Int.right + Vector2Int.up, ChessConditions.StandardCondition); } }
     static public ChessMove rd { get { return new ChessMove(Vector2Int.right + Vector2Int.down, ChessConditions.StandardCondition); } }
-
-    public CellState Relation(CoreBoard board)
-    {
-        if (board.Borders(From) && board.Borders(To))
-        {
-            ChessFigure actor = board[From.x, From.y];
-            ChessFigure sub = board[To.x, To.y];
-
-            return new CellState(sub.IsSolid, sub.Color == actor.OpponentColor);
-        }
-        return new CellState(true, false);
-    }
-
 
     public bool CheckCondition(CoreBoard board)
     {
@@ -74,21 +49,23 @@ public class ChessMove
 
     protected virtual void make_move(ChessBoard board)
     {
-        ChessFigure actor = board[From.x, From.y];
-        ChessFigure victim = board[To.x, To.y];
-
-        board[To] = actor.MovedFigure;
+        board[To] = board[From.x, From.y].MovedFigure;
         board[From] = new();
-        victim.Eaten(actor);
-        board.FinishMove();
-
     }
 
     public virtual ChessTurn Execute(ChessBoard board)
     {
-        make_move(board);
+        ChessFigure actor = board[From.x, From.y];
+        ChessFigure victim = board[To.x, To.y];
+        FigureColor side = actor.Color;
 
-        ChessTurn turn = new ChessTurn(From, To, board.Container.delta);
+        make_move(board);
+        
+        victim.Eaten(actor);
+        ChessTurn turn = new ChessTurn(From, To, board.Container.delta, side);
+        board.FinishMove(turn);
+        turn = new ChessTurn(From, To, board.Container.delta, side);
+
         board.Container.ClearDelta();
 
         return turn;
